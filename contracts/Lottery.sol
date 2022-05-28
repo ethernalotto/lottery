@@ -183,7 +183,8 @@ contract Lottery is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
   }
 
   function getDrawnNumbers(uint64 round) public view returns (uint8[6] memory numbers) {
-    require(state != State.OPEN, 'invalid state');
+    require(round < drawnNumbers.length, 'invalid round number');
+    require(round < drawnNumbers.length - 1 || state > State.DRAWING, 'invalid state');
     return drawnNumbers[round];
   }
 
