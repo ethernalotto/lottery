@@ -9,14 +9,14 @@ exports.Deployer = class Deployer {
     this._deployer = void 0;
   }
 
-  async _getDefaultSigner() {
+  async getDefaultSigner() {
     const signer = await getDefaultSigner();
     return await signer.getAddress();
   }
 
   async init(owner) {
     this._signers = await ethers.getSigners();
-    this._owner = owner || await this._getDefaultSigner();
+    this._owner = owner || await this.getDefaultSigner();
     this._deployer = await this._signers[0].getAddress();
     console.log('Deployer initialized, the signer is', this._deployer);
   }

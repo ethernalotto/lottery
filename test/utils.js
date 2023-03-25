@@ -1,6 +1,13 @@
 const {time} = require('@nomicfoundation/hardhat-network-helpers');
 
 
+function range(length, offset = 0) {
+  return Array.from({length}, (_, i) => offset + i);
+}
+
+exports.range = range;
+
+
 async function advanceTime(seconds) {
   await time.increase(seconds);
 }

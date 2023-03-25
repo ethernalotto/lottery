@@ -22,45 +22,45 @@ library TicketSet {
   function _advanceTo(uint64[] memory array, uint offset, uint64 minValue)
       private pure returns (uint)
   {
-    uint i = 1;
-    uint j = 2;
-    while (offset + j < array.length && array[offset + j] < minValue) {
-      i = j + 1;
-      j <<= 1;
+    uint length = array.length;
+    uint i = offset + 1;
+    uint j = offset + minValue - array[offset];
+    if (j > length) {
+      j = length;
     }
     while (i < j) {
       uint k = i + ((j - i) >> 1);
-      if (offset + k >= array.length || array[offset + k] > minValue) {
+      if (k >= length || array[k] > minValue) {
         j = k;
-      } else if (array[offset + k] < minValue) {
+      } else if (array[k] < minValue) {
         i = k + 1;
       } else {
-        return offset + k;
+        return k;
       }
     }
-    return offset + i;
+    return i;
   }
 
   function _advanceToStorage(uint64[] storage array, uint offset, uint64 minValue)
       private view returns (uint)
   {
-    uint i = 1;
-    uint j = 2;
-    while (offset + j < array.length && array[offset + j] < minValue) {
-      i = j + 1;
-      j <<= 1;
+    uint length = array.length;
+    uint i = offset + 1;
+    uint j = offset + minValue - array[offset];
+    if (j > length) {
+      j = length;
     }
     while (i < j) {
       uint k = i + ((j - i) >> 1);
-      if (offset + k >= array.length || array[offset + k] > minValue) {
+      if (k >= length || array[k] > minValue) {
         j = k;
-      } else if (array[offset + k] < minValue) {
+      } else if (array[k] < minValue) {
         i = k + 1;
       } else {
-        return offset + k;
+        return k;
       }
     }
-    return offset + i;
+    return i;
   }
 
   function _shrink(uint64[] memory array, uint count) private pure returns (uint64[] memory) {
@@ -94,10 +94,32 @@ library TicketSet {
     return _shrink(result, k);
   }
 
+  function intersectStorage(uint64[] storage first, uint64[] storage second)
+      public view returns (uint64[] memory result)
+  {
+    uint capacity = second.length < first.length ? second.length : first.length;
+    result = new uint64[](capacity);
+    uint i = 0;
+    uint j = 0;
+    uint k = 0;
+    while (i < first.length && j < second.length) {
+      if (first[i] < second[j]) {
+        i = _advanceToStorage(first, i, second[j]);
+      } else if (second[j] < first[i]) {
+        j = _advanceToStorage(second, j, first[i]);
+      } else {
+        result[k++] = first[i];
+        i++;
+        j++;
+      }
+    }
+    return _shrink(result, k);
+  }
+
   function subtract(uint64[] memory left, uint64[] memory right)
       public pure returns (uint64[] memory)
   {
-    if (right.length == 0) {
+    if (left.length == 0 || right.length == 0) {
       return left;
     }
     uint i = 0;
@@ -116,7 +138,11 @@ library TicketSet {
     while (i < left.length) {
       left[k++] = left[i++];
     }
-    return _shrink(left, k);
+    uint length = k;
+    while (k < left.length) {
+      delete left[k++];
+    }
+    return _shrink(left, length);
   }
 
   function union(uint64[] memory left, uint64[] memory right)

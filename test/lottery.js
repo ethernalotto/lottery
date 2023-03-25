@@ -2,7 +2,7 @@ const {ethers} = require('hardhat');
 const helpers = require('@nomicfoundation/hardhat-network-helpers');
 const {expect} = require('chai');
 const {Deployer} = require('../scripts/deployer');
-const {advanceTime, advanceTimeToNextDrawing} = require('./utils');
+const {advanceTime, advanceTimeToNextDrawing, range} = require('./utils');
 
 const {BigNumber} = ethers;
 
@@ -17,11 +17,6 @@ const FOUR_HOURS = 60 * 60 * 4;
 const THREE_DAYS = 60 * 60 * 24 * 3;
 const FOUR_DAYS = 60 * 60 * 24 * 4;
 const ONE_WEEK = 60 * 60 * 24 * 7;
-
-
-function range(length, offset = 0) {
-  return Array.from({length}, (_, i) => offset + i);
-}
 
 
 describe('Lottery', () => {
